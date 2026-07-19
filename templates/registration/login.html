@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Login | Antigravity Blog{% endblock %}
+
+{% block content %}
+<div class="container" style="display: flex; justify-content: center; align-items: center; min-height: 70vh; padding: 3rem 1rem;">
+    <div class="glass" style="max-width: 420px; width: 100%; padding: 2.5rem;">
+        <h2 class="section-subtitle" style="margin-bottom: 2rem; font-size: 1.8rem; text-align: center;">Sign In</h2>
+        
+        {% if form.errors %}
+            <div class="alert alert-danger glass" style="margin-bottom: 1.5rem; padding: 0.75rem 1rem; font-size: 0.85rem; border-radius: 8px;">
+                Your username and password didn't match. Please try again.
+            </div>
+        {% endif %}
+
+        <form method="post" action="{% url 'login' %}">
+            {% csrf_token %}
+            
+            <!-- Hidden Next Redirect Field -->
+            <input type="hidden" name="next" value="{{ next }}">
+
+            <div class="form-group">
+                <label class="form-label" for="id_username">Username</label>
+                <input type="text" name="username" autofocus required id="id_username" class="form-input" placeholder="Enter your username">
+            </div>
+
+            <div class="form-group" style="margin-bottom: 2rem;">
+                <label class="form-label" for="id_password">Password</label>
+                <input type="password" name="password" required id="id_password" class="form-input" placeholder="Enter your password">
+            </div>
+
+            <button type="submit" class="btn" style="width: 100%;">Sign In</button>
+        </form>
+
+        <div style="margin-top: 1.5rem; text-align: center; font-size: 0.85rem; color: var(--text-secondary);">
+            Don't have an account? <a href="{% url 'register' %}" style="color: var(--primary); font-weight: 600;">Register here</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

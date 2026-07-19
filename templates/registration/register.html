@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Register | Antigravity Blog{% endblock %}
+
+{% block content %}
+<div class="container" style="display: flex; justify-content: center; align-items: center; min-height: 75vh; padding: 3rem 1rem;">
+    <div class="glass auth-card" style="max-width: 460px; width: 100%; padding: 2.5rem;">
+        <h2 class="section-subtitle" style="margin-bottom: 2rem; font-size: 1.8rem; text-align: center;">Create Account</h2>
+
+        <form method="post" action="{% url 'register' %}">
+            {% csrf_token %}
+            
+            {% for field in form %}
+                <div class="form-group">
+                    <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    <!-- Django's form field widget will render here -->
+                    {{ field }}
+                    {% if field.help_text %}
+                        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">
+                            {{ field.help_text|safe }}
+                        </div>
+                    {% endif %}
+                    {% if field.errors %}
+                        <div style="color: #ef4444; font-size: 0.8rem; margin-top: 0.25rem;">
+                            {{ field.errors|striptags }}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            <button type="submit" class="btn" style="width: 100%; margin-top: 1rem;">Register</button>
+        </form>
+
+        <div style="margin-top: 1.5rem; text-align: center; font-size: 0.85rem; color: var(--text-secondary);">
+            Already have an account? <a href="{% url 'login' %}" style="color: var(--primary); font-weight: 600;">Sign in here</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

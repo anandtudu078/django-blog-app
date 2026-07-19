@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    {{ post.title }} | Antigravity Blog
+{% endblock %}
+
+{% block content %}
+<div class="container main-grid" style="padding-top: 3rem;">
+    <!-- Left Column: Post Details & Comments -->
+    <div class="post-column">
+        <!-- Post Detail Wrapper -->
+        <article class="post-detail-wrapper">
+            <!-- Header Hero Area -->
+            <div class="post-detail-hero">
+                {% if post.category %}
+                    <a href="{{ post.category.get_absolute_url }}" class="post-detail-category">{{ post.category.name }}</a>
+                {% endif %}
+                <h1 class="post-detail-title">{{ post.title }}</h1>
+                <div class="post-detail-meta">
+                    <div class="author-info">
+                        <div class="author-avatar" title="{{ post.author.username }}">
+                            {{ post.author.username|slice:":1"|upper }}
+                        </div>
+                        <span>By <strong>{{ post.author.username }}</strong></span>
+                    </div>
+                    <span>&bull;</span>
+                    <span>Published on {{ post.created_on|date:"F d, Y" }}</span>
+                    <span>&bull;</span>
+                    <span>{{ post.read_time }}</span>
+                </div>
+            </div>
+
+            <!-- Featured Image -->
+            {% if post.featured_image %}
+                <img src="{{ post.featured_image.url }}" alt="{{ post.title }}" class="post-detail-banner">
+            {% endif %}
+
+            <!-- Post Body Content -->
+            <div class="post-detail-body">
+                {{ post.content|linebreaks }}
+            </div>
+        </article>
+
+        <!-- Comments Section -->
+        <section class="comments-section">
+            <h2 class="section-subtitle">{{ comments.count }} Comment{{ comments.count|pluralize }}</h2>
+            
+            <!-- Comment List -->
+            <div class="comments-list">
+                {% if comments %}
+                    {% for comment in comments %}
+                        <div class="comment-card glass">
+                            <div class="comment-header">
+                                <div class="commenter-name">
+                                    <div class="author-avatar" style="width: 24px; height: 24px; font-size: 0.65rem;">
+                                        {{ comment.name|slice:":1"|upper }}
+                                    </div>
+                                    <span>{{ comment.name }}</span>
+                                </div>
+                                <span class="comment-date">{{ comment.created_on|date:"M d, Y @ H:i" }}</span>
+                            </div>
+                            <p class="comment-body">{{ comment.body }}</p>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p style="color: var(--text-muted); font-size: 0.95rem; font-style: italic;">No approved comments yet. Be the first to share your thoughts!</p>
+                {% endif %}
+            </div>
+
+            <!-- Write a Comment Form -->
+            <div class="comment-form-wrapper glass">
+                <h3 class="section-subtitle">Leave a response</h3>
+                <form action="{% url 'post_detail' slug=post.slug %}" method="post">
+                    {% csrf_token %}
+                    
+                    {% for field in comment_form %}
+                        {% if user.is_authenticated and field.name == 'name' or user.is_authenticated and field.name == 'email' %}
+                            <input type="hidden" name="{{ field.name }}" id="{{ field.id_for_label }}" value="{% if field.name == 'name' %}{{ user.username }}{% else %}{{ user.email|default:'authenticated@blog.com' }}{% endif %}">
+                        {% else %}
+                            <div class="form-group">
+                                <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                {{ field }}
+                                {% if field.errors %}
+                                    <div style="color: #ef4444; font-size: 0.8rem; margin-top: 0.25rem;">
+                                        {{ field.errors|striptags }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+
+                    <button type="submit" class="btn">Submit Response</button>
+                </form>
+            </div>
+        </section>
+    </div>
+
+    <!-- Right Column: Sidebar Widgets -->
+    <aside class="sidebar">
+        <!-- Author Profile Widget -->
+        <div class="widget glass" style="text-align: center;">
+            <h3 class="widget-title" style="text-align: left;">About Author</h3>
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 1rem; padding: 1rem 0;">
+                <div class="author-avatar" style="width: 72px; height: 72px; font-size: 2rem; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">
+                    {{ post.author.username|slice:":1"|upper }}
+                </div>
+                <div>
+                    <h4 style="font-size: 1.1rem; font-weight: 700;">{{ post.author.get_full_name|default:post.author.username }}</h4>
+                    <p style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; margin-top: 0.25rem;">Contributor</p>
+                </div>
+                <p style="color: var(--text-secondary); font-size: 0.875rem; line-height: 1.5;">Writes about modern tech stacks, architectural best practices, and elegant system designs.</p>
+            </div>
+        </div>
+
+        <!-- Categories Widget -->
+        <div class="widget glass">
+            <h3 class="widget-title">Categories</h3>
+            <ul class="widget-list">
+                {% if sidebar_categories %}
+                    {% for cat in sidebar_categories %}
+                        <li class="widget-item">
+                            <a href="{{ cat.get_absolute_url }}">
+                                <span>{{ cat.name }}</span>
+                                <span class="widget-badge">{{ cat.posts.count }}</span>
+                            </a>
+                        </li>
+                    {% endfor %}
+                {% else %}
+                    <li class="widget-item" style="padding: 0.5rem 0.75rem; color: var(--text-muted); font-size: 0.9rem;">No categories defined yet.</li>
+                {% endif %}
+            </ul>
+        </div>
+
+        <!-- Recent Posts Widget -->
+        <div class="widget glass">
+            <h3 class="widget-title">Recent Stories</h3>
+            <div class="recent-posts-list">
+                {% if recent_posts %}
+                    {% for rp in recent_posts %}
+                        <div class="recent-post-item">
+                            {% if rp.featured_image %}
+                                <img src="{{ rp.featured_image.url }}" alt="{{ rp.title }}" class="recent-post-thumb">
+                            {% else %}
+                                <div class="recent-post-thumb" style="background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);"></div>
+                            {% endif %}
+                            <div class="recent-post-info">
+                                <h4 class="recent-post-title">
+                                    <a href="{{ rp.get_absolute_url }}">{{ rp.title }}</a>
+                                </h4>
+                                <span class="recent-post-date">{{ rp.created_on|date:"M d, Y" }}</span>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p style="color: var(--text-muted); font-size: 0.9rem;">No recent articles.</p>
+                {% endif %}
+            </div>
+        </div>
+    </aside>
+</div>
+{% endblock %}

@@ -1,0 +1,88 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A premium blogging experience sharing insights, stories, and tutorials.">
+    <title>{% block title %}Tribe Blog{% endblock %}</title>
+    
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    
+    <!-- Theme Script (Inline head execution prevents flicker) -->
+    <script src="{% static 'js/theme.js' %}"></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container nav-wrapper">
+            <!-- Logo -->
+            <a href="{% url 'home' %}" class="logo">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--primary);"><path d="m12 3-1.912 5.886a1 1 0 0 1-.951.691H2.93a1 1 0 0 0-.588 1.81l5.022 3.649a1 1 0 0 1 .364 1.118l-1.913 5.885a1 1 0 0 0 1.54 1.118l5.021-3.65a1 1 0 0 1 1.176 0l5.022 3.65a1 1 0 0 0 1.54-1.118l-1.913-5.885a1 1 0 0 1 .364-1.118l5.022-3.649a1 1 0 0 0-.588-1.81h-6.207a1 1 0 0 1-.951-.691L12 3Z"/></svg>
+                Tribal Thoughts
+            </a>
+
+            <!-- Nav Links -->
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="{% url 'home' %}" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">Home</a></li>
+                    {% if user.is_authenticated %}
+                        <li style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span class="nav-link" style="cursor: default; color: var(--text-muted);">
+                                Hello, <strong>{{ user.username }}</strong>
+                            </span>
+                        </li>
+                        {% if user.is_staff %}
+                            <li><a href="{% url 'admin:index' %}" class="nav-link" target="_blank">Admin Panel</a></li>
+                        {% endif %}
+                        <li><a href="{% url 'logout' %}" class="nav-link">Logout</a></li>
+                    {% else %}
+                        <li><a href="{% url 'login' %}" class="nav-link {% if request.resolver_match.url_name == 'login' %}active{% endif %}">Login</a></li>
+                        <li><a href="{% url 'register' %}" class="nav-link {% if request.resolver_match.url_name == 'register' %}active{% endif %}">Register</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+
+            <!-- Actions: Search & Theme Toggle -->
+            <div class="nav-actions">
+                <form action="{% url 'search_posts' %}" method="get" class="nav-search-form">
+                    <svg class="nav-search-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    <input type="text" name="q" placeholder="Search articles..." value="{{ query|default:'' }}" class="nav-search-input" required id="search_input">
+                </form>
+                
+                <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle light/dark theme">
+                    <!-- Sun Icon -->
+                    <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+                    <!-- Moon Icon -->
+                    <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Success/Info Alerts -->
+    {% if messages %}
+    <div class="container alerts-wrapper">
+        {% for message in messages %}
+        <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} glass">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Main Content Area -->
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; {% now "Y" %} Tribal Blog. Designed with premium Love and aesthetics.</p>
+        </div>
+    </footer>
+</body>
+</html>
